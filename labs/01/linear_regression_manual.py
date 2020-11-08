@@ -25,21 +25,28 @@ def main(args):
     # If you want to learn about the dataset, uncomment the following line.
     # print(dataset.DESCR)
 
-    # TODO: Append a new feature to all input data, with value "1"
+    # Data
+    bias = np.ones([dataset.data.shape[0], 1])
+    regresors = np.concatenate((dataset.data, bias), axis=1)
+    targets = dataset.target
 
-    # TODO: Split the dataset into a train set and a test set.
+    # Split dataset
     # Use `sklearn.model_selection.train_test_split` method call, passing
     # arguments `test_size=args.test_size, random_state=args.seed`.
+    X_train, X_test, y_train, y_test = sklearn.model_selection.train_test_split(regresors, targets,
+                                                                                test_size=args.test_size,
+                                                                                random_state=args.seed)
 
-    # TODO: Solve the linear regression using the algorithm from the lecture,
+    # Weights computation
     # explicitly computing the matrix inverse (using `np.linalg.inv`).
+    w = np.linalg.inv(X_train.T @ X_train) @ X_train.T @ y_train
 
-    # TODO: Predict target values on the test set
+    # Prediction for X_test
+    y_pred = X_test @ w
 
-    # TODO: Compute root mean square error on the test set predictions
-    rmse = None
-
-    return rmse
+    # Compute root mean square error on the test set predictions
+    mse = sklearn.metrics.mean_squared_error(y_test, y_pred)
+    return np.sqrt(mse)
 
 
 if __name__ == "__main__":
