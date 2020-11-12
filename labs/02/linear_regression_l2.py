@@ -21,30 +21,29 @@ parser.add_argument("--test_size", default=0.5, type=lambda x: int(x) if x.isdig
 def main(args):
     # Load Boston housing dataset
     dataset = sklearn.datasets.load_boston()
-    data_train, data_test, target_train, target_test = sklearn.model_selection.train_test_split(dataset.data,
+
+    train_data, test_data, train_target, test_target = sklearn.model_selection.train_test_split(dataset.data,
                                                                                                 dataset.target,
                                                                                                 test_size=args.test_size,
                                                                                                 random_state=args.seed)
-    lambdas = np.geomspace(0.01, 100, num=500)
 
-    # Using `sklearn.linear_model.Ridge`, fit the train set using
-    # L2 regularization, employing above defined lambdas.
+    lambdas = np.geomspace(0.01, 100, num=500)
     rmses = []
+
     for lam in lambdas:
-        l2_model = sklearn.linear_model.Ridge(alpha=lam)
-        l2_model.fit(data_train, target_train)
-        target_pred = l2_model.predict(data_test)
-        rmse = sklearn.metrics.mean_squared_error(target_test, target_pred, squared=False)
+        model = sklearn.linear_model.Ridge(alpha=lam)
+        model.fit(train_data, train_target)
+        pred_target = model.predict(test_data)
+        rmse = sklearn.metrics.mean_squared_error(test_target, pred_target, squared=False)
         rmses.append(rmse)
 
-    # Find best rmse and best lambda
     best_rmse = min(rmses)
-    min_index = 0
+    best_index = 0
     for i in range(len(rmses)):
-        if best_rmse == rmses[i]:
-            min_index = i
-
-    best_lambda = lambdas[min_index]
+        if rmses[i] == best_rmse:
+            best_index = i
+            break
+    best_lambda = lambdas[best_index]
 
     if args.plot:
         # This block is not required to pass in ReCodEx, however, it is useful
