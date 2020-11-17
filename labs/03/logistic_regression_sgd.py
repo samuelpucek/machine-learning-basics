@@ -63,7 +63,7 @@ def main(args):
 
         train_pred = np.round(1 / (1 + np.exp(- train_data @ weights))).astype(int)
         train_accuracy = sum(train_pred == train_target) / train_data.shape[0]
-        train_loss=sklearn.metrics.log_loss(train_target, train_pred)
+        train_loss = sklearn.metrics.log_loss(train_target, train_pred)
 
         test_pred = np.round(1 / (1 + np.exp(-test_data @ weights))).astype(int)
         test_accuracy = sum(test_pred == test_target) / test_data.shape[0]
