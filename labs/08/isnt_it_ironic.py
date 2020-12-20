@@ -8,6 +8,15 @@ import sys
 import zipfile
 
 import numpy as np
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.feature_extraction.text import TfidfVectorizer, TfidfTransformer, CountVectorizer
+from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import GaussianNB, BernoulliNB, MultinomialNB
+from sklearn.metrics import accuracy_score, f1_score
+from sklearn.linear_model import SGDClassifier, RidgeClassifierCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.linear_model import LogisticRegression
 
 
 class Dataset:
@@ -38,6 +47,7 @@ parser.add_argument("--recodex", default=False, action="store_true", help="Runni
 parser.add_argument("--seed", default=42, type=int, help="Random seed")
 # For these and any other arguments you add, ReCodEx will keep your default value.
 parser.add_argument("--model_path", default="isnt_it_ironic.model", type=str, help="Model path")
+parser.add_argument("--test_size", default=0.5, type=lambda x: int(x) if x.isdigit() else float(x), help="Test size")
 
 
 def main(args):
@@ -46,8 +56,61 @@ def main(args):
         np.random.seed(args.seed)
         train = Dataset()
 
-        # TODO: Train a model on the given dataset and store it in `model`.
-        model = None
+        # Split data
+        train_data, test_data, train_target, test_target = train_test_split(train.data, train.target,
+                                                                            test_size=args.test_size,
+                                                                            random_state=args.seed)
+
+        # Model
+        pipeline = Pipeline([
+            ('vect', TfidfVectorizer()),
+            ('clf', BernoulliNB()),
+            # ('clf', MultinomialNB()),
+        ])
+
+        pipe_bernoulli = Pipeline([
+            ('vect', TfidfVectorizer(analyzer='word', lowercase=True, max_features=2500)),
+            ('clf', BernoulliNB(alpha=7.74))
+        ])
+
+        pipe_multinomial = Pipeline([
+            ('vect', TfidfVectorizer(analyzer='word', lowercase=False, max_features=5000)),
+            ('clf', MultinomialNB(alpha=7.74))
+        ])
+
+        params = {
+            'vect__analyzer': ('word', 'char', 'char_wb'),
+            'vect__lowercase': [True, False],
+            'vect__max_features': np.geomspace(10, 5000, 10, dtype=int),
+            'clf__alpha': np.geomspace(0.001, 100, 10),
+        }
+
+        model = GridSearchCV(pipeline, params, n_jobs=-1, verbose=10)
+        # Fit model
+        model.fit(train_data, train_target)
+
+        print('Model Selection')
+        print(model.best_score_)
+        print(model.best_params_)
+        print(model.best_estimator_)
+        print()
+        print('   ***')
+        print()
+
+        # Predict
+        pred_target = model.predict(test_data)
+
+        # Score
+        model_score = model.score(test_data, test_target)
+        f1 = f1_score(test_target, pred_target)
+        accuracy = accuracy_score(test_target, pred_target)
+
+        print(f'Model score:\t{model_score}')
+        print(f'F1 score:\t{f1}')
+        print(f'Accuracy score:\t{accuracy}')
+
+        # Final training
+        # model.fit(train.data, train.target)
 
         # Serialize the model.
         with lzma.open(args.model_path, "wb") as model_file:
@@ -60,9 +123,8 @@ def main(args):
         with lzma.open(args.model_path, "rb") as model_file:
             model = pickle.load(model_file)
 
-        # TODO: Generate `predictions` with the test set predictions, either
-        # as a Python list of a NumPy array.
-        predictions = None
+        # Generate `predictions`
+        predictions = model.predict(test.data)
 
         return predictions
 
