@@ -14,8 +14,10 @@ parser.add_argument("--learning_rate", default=0.1, type=float, help="Learning r
 parser.add_argument("--max_depth", default=None, type=int, help="Maximum decision tree depth")
 parser.add_argument("--recodex", default=False, action="store_true", help="Running in ReCodEx")
 parser.add_argument("--seed", default=57, type=int, help="Random seed")
-parser.add_argument("--test_size", default=42, type=lambda x:int(x) if x.isdigit() else float(x), help="Test set size")
+parser.add_argument("--test_size", default=42, type=lambda x: int(x) if x.isdigit() else float(x), help="Test set size")
 parser.add_argument("--trees", default=1, type=int, help="Number of trees in the forest")
+
+
 # If you add more arguments, ReCodEx will keep them with your default values.
 
 def main(args):
@@ -65,6 +67,7 @@ def main(args):
     test_accuracies = []
 
     return train_accuracies, test_accuracies
+
 
 if __name__ == "__main__":
     args = parser.parse_args([] if "__file__" not in globals() else None)

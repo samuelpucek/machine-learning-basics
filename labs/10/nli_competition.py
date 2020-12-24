@@ -6,6 +6,7 @@ import os
 
 import numpy as np
 
+
 class Dataset:
     CLASSES = ["ARA", "DEU", "FRA", "HIN", "ITA", "JPN", "KOR", "SPA", "TEL", "TUR", "ZHO"]
 
@@ -24,6 +25,7 @@ class Dataset:
                 self.target.append(-1 if not target else self.CLASSES.index(target))
         self.target = np.array(self.target, np.int32)
 
+
 parser = argparse.ArgumentParser()
 # These arguments will be set appropriately by ReCodEx, even if you change them.
 parser.add_argument("--predict", default=None, type=str, help="Run prediction on given data")
@@ -31,6 +33,7 @@ parser.add_argument("--recodex", default=False, action="store_true", help="Runni
 parser.add_argument("--seed", default=42, type=int, help="Random seed")
 # For these and any other arguments you add, ReCodEx will keep your default value.
 parser.add_argument("--model_path", default="nli_competition.model", type=str, help="Model path")
+
 
 def main(args):
     if args.predict is None:
