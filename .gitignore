@@ -1,2 +1,5 @@
 venv
-labs/10/nli_dataset
+labs/10/nli_dataset.dev.txt
+labs/10/nli_dataset.LICENSE.pdf
+labs/10/nli_dataset.README
+labs/10/nli_dataset.train.txt
